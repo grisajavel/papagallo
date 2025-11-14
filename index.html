@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Registreringsformulär — Steg 1</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="container">
+    <header class="hero">
+      <h1>Registrera uppgifter</h1>
+      <p class="lead">Välj ett alternativ och fyll i siffror samt dina uppgifter. Dessa sparas lokalt i din webbläsare.</p>
+    </header>
+
+    <form id="dataForm" class="card" autocomplete="off" novalidate>
+      <fieldset class="option-group">
+        <legend>Välj alternativ</legend>
+        <label class="radio">
+          <input type="radio" name="option" value="A" id="optA" required>
+          <span>Per person</span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="option" value="B" id="optB">
+          <span>Total mängd</span>
+        </label>
+      </fieldset>
+
+      <!-- Per person -->
+      <div id="inputsA" class="inputs hidden">
+        <label>Antal personer
+          <input type="number" min="0" step="any" name="a1" id="a1" placeholder="0">
+        </label>
+        <label>Antal öl per person (33 cl)
+          <input type="number" min="0" step="any" name="a2" id="a2" placeholder="0">
+          <small class="hint">Totalt antal liter: <span id="a2_liters">0</span></small>
+        </label>
+        <label>Antal glas vin per person (12 cl)
+          <input type="number" min="0" step="any" name="a3" id="a3" placeholder="0">
+          <small class="hint">Totalt antal liter: <span id="a3_liters">0</span></small>
+        </label>
+        <label>Antal starksprit per person (4 cl)
+          <input type="number" min="0" step="any" name="a4" id="a4" placeholder="0">
+          <small class="hint">Totalt antal liter: <span id="a4_liters">0</span></small>
+        </label>
+      </div>
+
+      <!-- Total mängd -->
+      <div id="inputsB" class="inputs hidden">
+        <label>Totala antal öl (330 ml)
+          <div style="display:flex; align-items:center; gap:10px;">
+            <input type="number" min="0" step="any" name="b1" id="b1" placeholder="0">
+            <span>Antal flak (24 st):</span>
+            <input type="number" min="0" max="999" step="1" name="b1_flaks" id="b1_flaks" placeholder="0" inputmode="numeric">
+          </div>
+          <small class="hint">Totalt antal liter: <span id="b1_liters">0</span></small>
+        </label>
+        <label>Totala glas vin (125 ml)
+          <div style="display:flex; align-items:center; gap:10px;">
+            <input type="number" min="0" step="any" name="b2" id="b2" placeholder="0">
+            <span>Antal flaskor (750 ml):</span>
+            <input type="number" min="0" max="999" step="1" name="b2_flaskor" id="b2_flaskor" placeholder="0" inputmode="numeric">
+            <span>Antal Bag-In-Box (3000 ml):</span>
+            <input type="number" min="0" max="999" step="1" name="b2_bib" id="b2_bib" placeholder="0" inputmode="numeric">
+          </div>
+          <small class="hint">Totalt antal liter: <span id="b2_liters">0</span></small>
+        </label>
+        <label>Totala glas starksprit (40 ml)
+          <div style="display:flex; align-items:center; gap:10px;">
+            <input type="number" min="0" step="any" name="b3" id="b3" placeholder="0">
+            <span>Antal flaskor (700 ml):</span>
+            <input type="number" min="0" max="999" step="1" name="b3_flaskor" id="b3_flaskor" placeholder="0" inputmode="numeric">
+            <span>Antal Bag-In-Box (3000 ml):</span>
+            <input type="number" min="0" max="999" step="1" name="b3_bib" id="b3_bib" placeholder="0" inputmode="numeric">
+          </div>
+          <small class="hint">Totalt antal liter: <span id="b3_liters">0</span></small>
+        </label>
+      </div>
+
+      <label>Registreringsnummer
+        <input type="text" name="regnr" id="regnr" maxlength="7" placeholder="ABC-123" required>
+        <small class="hint">Används för att kalkylera transportkostnad till kontinenten.</small>
+      </label>
+
+      <label>Postnummer
+        <input type="text" name="postcode" id="postcode" maxlength="5" placeholder="12345" required pattern="^[0-9]{5}$">
+        <small class="hint">Används för att kalkylera transportkostnad till kontinenten.</small>
+        <small class="hint" id="postort">Postort: </small>
+      </label>
+
+      <div class="buttons">
+        <button type="submit" class="btn primary">Spara</button>
+        <button type="button" id="downloadBtn" class="btn" disabled>Ladda ner JSON</button>
+        <button type="button" id="clearBtn" class="btn ghost">Rensa</button>
+      </div>
+
+      <div id="message" class="message" aria-live="polite"></div>
+    </form>
+
+    <footer class="foot">
+      <p>text längst ner</p>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
