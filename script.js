@@ -78,29 +78,33 @@ function updateB3Total(){
 [b3Input, b3Flaskor, b3Bib].forEach(el => el?.addEventListener('input', updateB3Total));
 
 // --- Postnummer → Postort ---
-// Local postal code database
-const postalCodeData = {
-  '10004': 'Stockholm', '10005': 'Stockholm', '10012': 'Stockholm',
-  '10019': 'Stockholm', '10026': 'Stockholm', '10028': 'Stockholm',
-  '10029': 'Stockholm', '10031': 'Stockholm', '10040': 'Stockholm',
-  '20001': 'Malmö', '20002': 'Malmö', '20010': 'Malmö',
-  '30001': 'Växjö', '30002': 'Växjö', '30010': 'Växjö',
-  '40001': 'Göteborg', '40002': 'Göteborg', '40010': 'Göteborg',
-  '50001': 'Borås', '50010': 'Borås',
-  '60001': 'Norrköping', '60010': 'Norrköping',
-  '70001': 'Örebro', '70010': 'Örebro',
-  '80001': 'Gävle', '80010': 'Gävle',
-  '90001': 'Umeå', '90010': 'Umeå',
-  '95001': 'Luleå', '95010': 'Luleå',
-  '21771': 'Malmö'
-};
+// Load CSV data on page load
+let csvData = [];
+
+fetch('sweden-zipcode.csv')
+  .then(response => response.text())
+  .then(data => {
+    csvData = data.trim().split('\n').map(line => line.split(','));
+    // Remove header row
+    csvData.shift();
+  })
+  .catch(error => console.error('Error loading CSV:', error));
+
+// Function to search CSV for postal code
+function findCityForPostalCode(postalCode) {
+  const found = csvData.find(row => row[0] === postalCode);
+  if(found) {
+    return found[1]; // Return city name (UPPERCASE from CSV)
+  }
+  return null;
+}
 
 document.getElementById('postcode').addEventListener('blur', function(){
   const val = this.value.trim();
   if(/^\d{5}$/.test(val)){
-    const ort = postalCodeData[val];
+    const ort = findCityForPostalCode(val);
     if(ort){
-      // Konvertera till bara första bokstav stor, resten små
+      // Konvertera från UPPERCASE till bara första bokstav stor, resten små
       const formattedOrt = ort.charAt(0).toUpperCase() + ort.slice(1).toLowerCase();
       document.getElementById('postort').textContent = "Postort: " + formattedOrt;
     } else {
@@ -108,3 +112,4 @@ document.getElementById('postcode').addEventListener('blur', function(){
     }
   }
 });
+
