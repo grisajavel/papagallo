@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="container">
+  <main class="container" id="mainForm">
     <header class="hero">
       <h1>Registrera uppgifter</h1>
       <p class="lead">Välj ett alternativ och fyll i siffror samt dina uppgifter. Dessa sparas lokalt i din webbläsare.</p>
@@ -31,15 +31,15 @@
         <label>Antal personer
           <input type="number" min="0" step="any" name="a1" id="a1" placeholder="0">
         </label>
-        <label>Antal öl per person (33 cl)
+        <label>Antal öl per person (330 ml)
           <input type="number" min="0" step="any" name="a2" id="a2" placeholder="0">
           <small class="hint">Totalt antal liter: <span id="a2_liters">0</span></small>
         </label>
-        <label>Antal glas vin per person (12 cl)
+        <label>Antal glas vin per person (125 ml)
           <input type="number" min="0" step="any" name="a3" id="a3" placeholder="0">
           <small class="hint">Totalt antal liter: <span id="a3_liters">0</span></small>
         </label>
-        <label>Antal starksprit per person (4 cl)
+        <label>Antal starksprit per person (40 ml)
           <input type="number" min="0" step="any" name="a4" id="a4" placeholder="0">
           <small class="hint">Totalt antal liter: <span id="a4_liters">0</span></small>
         </label>
@@ -78,19 +78,18 @@
       </div>
 
       <label>Registreringsnummer
-        <input type="text" name="regnr" id="regnr" maxlength="7" placeholder="ABC-123" required>
+        <input type="text" name="regnr" id="regnr" maxlength="6" placeholder="ABC123" required>
         <small class="hint">Används för att kalkylera transportkostnad till kontinenten.</small>
       </label>
 
       <label>Postnummer
-        <input type="text" name="postcode" id="postcode" maxlength="5" placeholder="12345" required pattern="^[0-9]{5}$">
+        <input type="text" name="postcode" id="postcode" maxlength="5" inputmode="numeric" placeholder="12345" required>
         <small class="hint">Används för att kalkylera transportkostnad till kontinenten.</small>
         <small class="hint" id="postort">Postort: </small>
       </label>
 
       <div class="buttons">
-        <button type="submit" class="btn primary">Spara</button>
-        <button type="button" id="downloadBtn" class="btn" disabled>Ladda ner JSON</button>
+        <button type="submit" class="btn primary">Beräkna kostnad</button>
         <button type="button" id="clearBtn" class="btn ghost">Rensa</button>
       </div>
 
@@ -102,6 +101,125 @@
     </footer>
   </main>
 
+  <!-- Results Page -->
+  <main class="container" id="resultsPage" style="display:none;">
+    <header class="hero">
+      <h1>Kostnadskalkyl</h1>
+      <div class="button-group">
+        <button type="button" id="backBtn" class="btn">Tillbaka</button>
+        <button type="button" id="newCalcBtn" class="btn">Ny uträkning</button>
+        <button type="button" id="shareBtn" class="btn">Dela</button>
+      </div>
+    </header>
+
+    <div class="results-grid">
+      <!-- Box S -->
+      <div class="result-box">
+        <h2>Systembolaget</h2>
+        <div class="result-values">
+          <div class="result-item">
+            <span class="label">Totalkostand:</span>
+            <span class="value" id="s_value1">-</span>
+          </div>
+          <div class="result-item">
+            <span class="label">Transportkostnad:</span>
+            <span class="value" id="s_value2">-</span>
+          </div>
+          <div class="result-item">
+            <span class="label">Dryckeskostnad:</span>
+            <span class="value" id="s_value3">-</span>
+          </div>
+        </div>
+        <button type="button" class="btn-details">Se detaljer</button>
+      </div>
+
+      <!-- Box DB -->
+      <div class="result-box">
+        <h2>Danmark via Öresundsbron</h2>
+        <div class="result-values">
+          <div class="result-item">
+            <span class="label">Totalkostand:</span>
+            <span class="value" id="db_value1">-</span>
+          </div>
+          <div class="result-item">
+            <span class="label">Transportkostnad:</span>
+            <span class="value" id="db_value2">-</span>
+          </div>
+          <div class="result-item">
+            <span class="label">Dryckeskostnad:</span>
+            <span class="value" id="db_value3">-</span>
+          </div>
+        </div>
+        <button type="button" class="btn-details">Se detaljer</button>
+      </div>
+
+      <!-- Box DF -->
+      <div class="result-box">
+        <h2>Danmark med Färja</h2>
+        <div class="result-values">
+          <div class="result-item">
+            <span class="label">Totalkostand:</span>
+            <span class="value" id="df_value1">-</span>
+          </div>
+          <div class="result-item">
+            <span class="label">Transportkostnad:</span>
+            <span class="value" id="df_value2">-</span>
+          </div>
+          <div class="result-item">
+            <span class="label">Dryckeskostnad:</span>
+            <span class="value" id="df_value3">-</span>
+          </div>
+        </div>
+        <button type="button" class="btn-details">Se detaljer</button>
+      </div>
+
+      <!-- Box TB -->
+      <div class="result-box">
+        <h2>Tyskland Öresundsbron + Färja</h2>
+        <div class="result-values">
+          <div class="result-item">
+            <span class="label">Totalkostand:</span>
+            <span class="value" id="tb_value1">-</span>
+          </div>
+          <div class="result-item">
+            <span class="label">Transportkostnad:</span>
+            <span class="value" id="tb_value2">-</span>
+          </div>
+          <div class="result-item">
+            <span class="label">Dryckeskostnad:</span>
+            <span class="value" id="tb_value3">-</span>
+          </div>
+        </div>
+        <button type="button" class="btn-details">Se detaljer</button>
+      </div>
+
+      <!-- Box TF -->
+      <div class="result-box">
+        <h2>Tyskland Färja + Färja</h2>
+        <div class="result-values">
+          <div class="result-item">
+            <span class="label">Totalkostand:</span>
+            <span class="value" id="tf_value1">-</span>
+          </div>
+          <div class="result-item">
+            <span class="label">Transportkostnad:</span>
+            <span class="value" id="tf_value2">-</span>
+          </div>
+          <div class="result-item">
+            <span class="label">Dryckeskostnad:</span>
+            <span class="value" id="tf_value3">-</span>
+          </div>
+        </div>
+        <button type="button" class="btn-details">Se detaljer</button>
+      </div>
+    </div>
+
+    <footer class="foot">
+      <p>text längst ner</p>
+    </footer>
+  </main>
+
   <script src="script.js"></script>
 </body>
 </html>
+
