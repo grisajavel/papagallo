@@ -43,9 +43,19 @@ function updatePerPerson() {
   if(el) el.addEventListener('input', updatePerPerson);
 });
 
+// Registration number - convert to uppercase
+document.getElementById('regnr').addEventListener('input', function(){
+  this.value = this.value.toUpperCase();
+});
+
+// Postal code - only allow numbers
+document.getElementById('postcode').addEventListener('input', function(){
+  this.value = this.value.replace(/[^0-9]/g, '');
+});
+
 // --- Total mängd beräkningar ---
 function updateB1Total(){
-  const manual = parseFloat(b1Input.dataset.manual || b1Input.value || '0') || 0;
+  const manual = parseFloat(b1Input.dataset.manual || '0') || 0;
   const flaks = parseInt(b1Flaks.value) || 0;
   const total = manual + flaks * 24;
   b1Input.value = total;
@@ -54,7 +64,7 @@ function updateB1Total(){
 }
 
 function updateB2Total(){
-  const manual = parseFloat(b2Input.dataset.manual || b2Input.value || '0') || 0;
+  const manual = parseFloat(b2Input.dataset.manual || '0') || 0;
   const flaskor = parseInt(b2Flaskor.value) || 0;
   const bib = parseInt(b2Bib.value) || 0;
   const total = manual + flaskor * 6 + bib * 24;
@@ -64,7 +74,7 @@ function updateB2Total(){
 }
 
 function updateB3Total(){
-  const manual = parseFloat(b3Input.dataset.manual || b3Input.value || '0') || 0;
+  const manual = parseFloat(b3Input.dataset.manual || '0') || 0;
   const flaskor = parseInt(b3Flaskor.value) || 0;
   const bib = parseInt(b3Bib.value) || 0;
   const total = manual + flaskor * 17.5 + bib * 75;
@@ -73,9 +83,25 @@ function updateB3Total(){
   document.getElementById('b3_liters').textContent = liters;
 }
 
-[b1Input, b1Flaks].forEach(el => el?.addEventListener('input', updateB1Total));
-[b2Input, b2Flaskor, b2Bib].forEach(el => el?.addEventListener('input', updateB2Total));
-[b3Input, b3Flaskor, b3Bib].forEach(el => el?.addEventListener('input', updateB3Total));
+// Store manual values when user directly edits the input fields
+b1Input.addEventListener('input', function(){
+  b1Input.dataset.manual = this.value;
+  updateB1Total();
+});
+
+b2Input.addEventListener('input', function(){
+  b2Input.dataset.manual = this.value;
+  updateB2Total();
+});
+
+b3Input.addEventListener('input', function(){
+  b3Input.dataset.manual = this.value;
+  updateB3Total();
+});
+
+[b1Flaks].forEach(el => el?.addEventListener('input', updateB1Total));
+[b2Flaskor, b2Bib].forEach(el => el?.addEventListener('input', updateB2Total));
+[b3Flaskor, b3Bib].forEach(el => el?.addEventListener('input', updateB3Total));
 
 // --- Postnummer → Postort ---
 // Load CSV data on page load
@@ -107,9 +133,195 @@ document.getElementById('postcode').addEventListener('blur', function(){
       // Konvertera från UPPERCASE till bara första bokstav stor, resten små
       const formattedOrt = ort.charAt(0).toUpperCase() + ort.slice(1).toLowerCase();
       document.getElementById('postort').textContent = "Postort: " + formattedOrt;
+      this.classList.remove('error');
     } else {
       document.getElementById('postort').textContent = "Postort: Okänd postnummer";
+      this.classList.add('error');
     }
   }
 });
 
+// --- Save to localStorage only on Save button click ---
+function saveFormData() {
+  const formData = {
+    option: document.querySelector('input[name="option"]:checked')?.value || '',
+    a1: document.getElementById('a1')?.value || '',
+    a2: document.getElementById('a2')?.value || '',
+    a3: document.getElementById('a3')?.value || '',
+    a4: document.getElementById('a4')?.value || '',
+    b1: document.getElementById('b1')?.value || '',
+    b1_flaks: document.getElementById('b1_flaks')?.value || '',
+    b2: document.getElementById('b2')?.value || '',
+    b2_flaskor: document.getElementById('b2_flaskor')?.value || '',
+    b2_bib: document.getElementById('b2_bib')?.value || '',
+    b3: document.getElementById('b3')?.value || '',
+    b3_flaskor: document.getElementById('b3_flaskor')?.value || '',
+    b3_bib: document.getElementById('b3_bib')?.value || '',
+    regnr: document.getElementById('regnr')?.value || '',
+    postcode: document.getElementById('postcode')?.value || ''
+  };
+  localStorage.setItem('beverageFormData', JSON.stringify(formData));
+  showMessage('Data sparad!', 'success');
+}
+
+function loadFormData() {
+  const saved = localStorage.getItem('beverageFormData');
+  if(saved) {
+    // Clear all form inputs first
+    document.getElementById('a1').value = '';
+    document.getElementById('a2').value = '';
+    document.getElementById('a3').value = '';
+    document.getElementById('a4').value = '';
+    document.getElementById('b1').value = '';
+    document.getElementById('b1_flaks').value = '';
+    document.getElementById('b2').value = '';
+    document.getElementById('b2_flaskor').value = '';
+    document.getElementById('b2_bib').value = '';
+    document.getElementById('b3').value = '';
+    document.getElementById('b3_flaskor').value = '';
+    document.getElementById('b3_bib').value = '';
+    document.getElementById('regnr').value = '';
+    document.getElementById('postcode').value = '';
+    document.getElementById('postort').textContent = 'Postort: ';
+    
+    // Clear data attributes
+    b1Input.dataset.manual = '';
+    b2Input.dataset.manual = '';
+    b3Input.dataset.manual = '';
+    
+    // Clear all display values
+    document.getElementById('a2_liters').textContent = '0';
+    document.getElementById('a3_liters').textContent = '0';
+    document.getElementById('a4_liters').textContent = '0';
+    document.getElementById('b1_liters').textContent = '0';
+    document.getElementById('b2_liters').textContent = '0';
+    document.getElementById('b3_liters').textContent = '0';
+    
+    // Clear radio selection
+    document.querySelectorAll('input[name="option"]').forEach(radio => radio.checked = false);
+  }
+}
+
+function showMessage(text, type = 'info') {
+  const msg = document.getElementById('message');
+  msg.textContent = text;
+  msg.className = 'message ' + type;
+  setTimeout(() => msg.className = 'message', 2000);
+}
+
+// Prevent form submission and save only on button click
+document.getElementById('dataForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  
+  const postcodeInput = document.getElementById('postcode');
+  // Check if a valid postort has been found
+  const postortText = document.getElementById('postort').textContent;
+  if(postortText === 'Postort: ' || postortText === 'Postort: Okänd postnummer') {
+    showMessage('Du måste ange ett giltigt postnummer för att fortsätta!', 'error');
+    postcodeInput.classList.add('error');
+    return;
+  }
+  
+  postcodeInput.classList.remove('error');
+  saveFormData();
+  showResultsPage();
+});
+
+// Back button on results page
+document.getElementById('backBtn').addEventListener('click', function(){
+  document.getElementById('mainForm').style.display = 'block';
+  document.getElementById('resultsPage').style.display = 'none';
+});
+
+// New calculation button
+document.getElementById('newCalcBtn').addEventListener('click', function(){
+  document.getElementById('mainForm').style.display = 'block';
+  document.getElementById('resultsPage').style.display = 'none';
+});
+
+// Share button
+document.getElementById('shareBtn').addEventListener('click', function(){
+  alert('Dela funktionalitet kommer snart!');
+});
+
+// Details buttons for each box
+document.querySelectorAll('.btn-details').forEach(btn => {
+  btn.addEventListener('click', function(){
+    alert('Detaljer för denna rubriken kommer snart!');
+  });
+});
+
+// Clear button - rensa all form data
+document.getElementById('clearBtn').addEventListener('click', function(){
+  // Clear all form inputs
+  document.getElementById('a1').value = '';
+  document.getElementById('a2').value = '';
+  document.getElementById('a3').value = '';
+  document.getElementById('a4').value = '';
+  document.getElementById('b1').value = '';
+  document.getElementById('b1_flaks').value = '';
+  document.getElementById('b2').value = '';
+  document.getElementById('b2_flaskor').value = '';
+  document.getElementById('b2_bib').value = '';
+  document.getElementById('b3').value = '';
+  document.getElementById('b3_flaskor').value = '';
+  document.getElementById('b3_bib').value = '';
+  document.getElementById('regnr').value = '';
+  document.getElementById('postcode').value = '';
+  document.getElementById('postort').textContent = 'Postort: ';
+  
+  // Clear data attributes
+  b1Input.dataset.manual = '';
+  b2Input.dataset.manual = '';
+  b3Input.dataset.manual = '';
+  
+  // Clear all display values
+  document.getElementById('a2_liters').textContent = '0';
+  document.getElementById('a3_liters').textContent = '0';
+  document.getElementById('a4_liters').textContent = '0';
+  document.getElementById('b1_liters').textContent = '0';
+  document.getElementById('b2_liters').textContent = '0';
+  document.getElementById('b3_liters').textContent = '0';
+  
+  // Clear radio selection
+  document.querySelectorAll('input[name="option"]').forEach(radio => radio.checked = false);
+  
+  // Clear localStorage
+  localStorage.removeItem('beverageFormData');
+  
+  showMessage('Alla värden har rensats!', 'success');
+});
+
+// Show results page
+function showResultsPage() {
+  document.getElementById('mainForm').style.display = 'none';
+  document.getElementById('resultsPage').style.display = 'block';
+  calculateResults();
+}
+
+// Calculate results and populate the boxes
+function calculateResults() {
+  // Placeholder values - will be replaced with actual calculations
+  document.getElementById('s_value1').textContent = '0';
+  document.getElementById('s_value2').textContent = '0';
+  document.getElementById('s_value3').textContent = '0';
+
+  document.getElementById('db_value1').textContent = '0';
+  document.getElementById('db_value2').textContent = '0';
+  document.getElementById('db_value3').textContent = '0';
+
+  document.getElementById('df_value1').textContent = '0';
+  document.getElementById('df_value2').textContent = '0';
+  document.getElementById('df_value3').textContent = '0';
+
+  document.getElementById('tb_value1').textContent = '0';
+  document.getElementById('tb_value2').textContent = '0';
+  document.getElementById('tb_value3').textContent = '0';
+
+  document.getElementById('tf_value1').textContent = '0';
+  document.getElementById('tf_value2').textContent = '0';
+  document.getElementById('tf_value3').textContent = '0';
+}
+
+// Load saved data on page load
+window.addEventListener('DOMContentLoaded', loadFormData);
